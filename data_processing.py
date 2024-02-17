@@ -66,7 +66,7 @@ def extract_video_frame(source_video_dir,res_video_frame_dir):
                 ret, frame = videoCapture.read()
                 if ret:
                     result_path = os.path.join(frame_dir, str(i).zfill(6) + '.jpg')
-                cv2.imwrite(result_path, frame)
+                    cv2.imwrite(result_path, frame)
         videoCapture.release()
 
 
