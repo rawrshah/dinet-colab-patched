@@ -57,14 +57,17 @@ def extract_video_frame(source_video_dir,res_video_frame_dir):
             os.makedirs(frame_dir)
         print('extracting frames from {} ...'.format(video_name))
         videoCapture = cv2.VideoCapture(video_path)
-        fps = videoCapture.get(cv2.CAP_PROP_FPS)
-        if int(fps) != 25:
-            raise ('{} video is not in 25 fps'.format(video_path))
-        frames = videoCapture.get(cv2.CAP_PROP_FRAME_COUNT)
-        for i in range(int(frames)):
-            ret, frame = videoCapture.read()
-            result_path = os.path.join(frame_dir, str(i).zfill(6) + '.jpg')
-            cv2.imwrite(result_path, frame)
+        if videoCapture.isOpened():
+            fps = videoCapture.get(cv2.CAP_PROP_FPS)
+            if int(fps) != 25:
+                raise ('{} video is not in 25 fps'.format(video_path))
+            frames = videoCapture.get(cv2.CAP_PROP_FRAME_COUNT)
+            for i in range(int(frames)):
+                ret, frame = videoCapture.read()
+                if ret:
+                    result_path = os.path.join(frame_dir, str(i).zfill(6) + '.jpg')
+                cv2.imwrite(result_path, frame)
+        videoCapture.release()
 
 
 def crop_face_according_openfaceLM(openface_landmark_dir,video_frame_dir,res_crop_face_dir,clip_length):
@@ -97,7 +100,7 @@ def crop_face_according_openfaceLM(openface_landmark_dir,video_frame_dir,res_cro
             first_image = cv2.imread(os.path.join(frame_dir, '000000.jpg'))
             video_h,video_w = first_image.shape[0], first_image.shape[1]
             crop_flag, radius_clip = compute_crop_radius((video_w,video_h),
-                                    landmark_openface_data[end_frame_index[i] - clip_length:end_frame_index[i], :,:])
+                                                         landmark_openface_data[end_frame_index[i] - clip_length:end_frame_index[i], :,:])
             if not crop_flag:
                 continue
             radius_clip_1_4 = radius_clip // 4
@@ -150,7 +153,7 @@ def generate_training_json(crop_face_dir,deep_speech_dir,clip_length,res_json_pa
             if len(frame_name_list) != len(deep_speech_list):
                 print(' skip video: {}:{}/{}  clip:{}:{}/{} because of different length: {} {}'.format(
                     video_name,video_index,len(video_name_list),clip_name,clip_index,len(clip_name_list),
-                     len(frame_name_list),len(deep_speech_list)))
+                    len(frame_name_list),len(deep_speech_list)))
             tem_tem_dic['frame_name_list'] = frame_name_list
             tem_tem_dic['frame_path_list'] = frame_path_list
             tem_tem_dic['deep_speech_list'] = deep_speech_list
@@ -168,6 +171,7 @@ if __name__ == '__main__':
     opt = DataProcessingOptions().parse_args()
     ##########  step1: extract video frames
     if opt.extract_video_frame:
+        print(opt.source_video_dir)
         extract_video_frame(opt.source_video_dir, opt.video_frame_dir)
     ##########  step2: extract audio files
     if opt.extract_audio:
