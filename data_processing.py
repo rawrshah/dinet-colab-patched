@@ -91,8 +91,8 @@ def crop_face_according_openfaceLM(openface_landmark_dir,video_frame_dir,res_cro
         frame_dir = os.path.join(video_frame_dir, video_name)
         if not os.path.exists(frame_dir):
             raise ('run last step to extract video frame')
-        if len(glob.glob(os.path.join(frame_dir, '*.jpg'))) != landmark_openface_data.shape[0]:
-            raise ('landmark length is different from frame length')
+        # if len(glob.glob(os.path.join(frame_dir, '*.jpg'))) != landmark_openface_data.shape[0]:
+        #     raise ('landmark length is different from frame length')
         frame_length = min(len(glob.glob(os.path.join(frame_dir, '*.jpg'))), landmark_openface_data.shape[0])
         end_frame_index = list(range(clip_length, frame_length, clip_length))
         video_clip_num = len(end_frame_index)
